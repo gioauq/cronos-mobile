@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>History</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js"></script>
+    <style type="text/tailwindcss">
+      @theme inline {
+        --color-background: var(--background);
+        --color-foreground: var(--foreground);
+        --color-primary: var(--primary);
+        --color-primary-foreground: var(--primary-foreground);
+        --color-secondary: var(--secondary);
+        --color-secondary-foreground: var(--secondary-foreground);
+        --color-muted: var(--muted);
+        --color-muted-foreground: var(--muted-foreground);
+        --color-accent: var(--accent);
+        --color-accent-foreground: var(--accent-foreground);
+        --color-destructive: var(--destructive);
+        --color-card: var(--card);
+        --color-card-foreground: var(--card-foreground);
+        --color-popover: var(--popover);
+        --color-popover-foreground: var(--popover-foreground);
+        --color-border: var(--border);
+        --color-input: var(--input);
+        --color-ring: var(--ring);
+        --color-chart-1: var(--chart-1);
+        --color-chart-2: var(--chart-2);
+        --color-chart-3: var(--chart-3);
+        --color-chart-4: var(--chart-4);
+        --color-chart-5: var(--chart-5);
+
+        --font-font-sans: var(--font-sans);
+        --font-font-heading: var(--font-heading);
+        --font-font-serif: var(--font-serif);
+        --font-font-mono: var(--font-mono);
+      }
+
+      @theme {
+        --radius-xs: calc(var(--radius) - 8px);
+        --radius-sm: calc(var(--radius) - 4px);
+        --radius-md: calc(var(--radius) - 2px);
+        --radius-lg: var(--radius);
+        --radius-xl: calc(var(--radius) + 4px);
+        --radius-2xl: calc(var(--radius) + 8px);
+        --radius-3xl: calc(var(--radius) + 16px);
+        --radius-4xl: calc(var(--radius) + 24px);
+      }
+
+      * {
+        corner-shape: var(--shape, round);
+      }
+
+      .rounded-full,
+      .rounded-none,
+      .rounded-t-full,
+      .rounded-t-none,
+      .rounded-r-full,
+      .rounded-r-none,
+      .rounded-b-full,
+      .rounded-b-none,
+      .rounded-l-full,
+      .rounded-l-none,
+      .rounded-s-full,
+      .rounded-s-none,
+      .rounded-e-full,
+      .rounded-e-none,
+      .rounded-tl-full,
+      .rounded-tl-none,
+      .rounded-tr-full,
+      .rounded-tr-none,
+      .rounded-bl-full,
+      .rounded-bl-none,
+      .rounded-br-full,
+      .rounded-br-none,
+      .rounded-ss-full,
+      .rounded-ss-none,
+      .rounded-se-full,
+      .rounded-se-none,
+      .rounded-es-full,
+      .rounded-es-none,
+      .rounded-ee-full,
+      .rounded-ee-none {
+        corner-shape: round;
+      }
+
+      @utility rounded-* {
+        border-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-t-* {
+        border-top-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-top-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-r-* {
+        border-top-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-bottom-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-b-* {
+        border-bottom-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-bottom-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-l-* {
+        border-top-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-bottom-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-tl-* {
+        border-top-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-tr-* {
+        border-top-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-bl-* {
+        border-bottom-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-br-* {
+        border-bottom-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-s-* {
+        border-start-start-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-end-start-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-e-* {
+        border-start-end-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-end-end-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-ss-* {
+        border-start-start-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-se-* {
+        border-start-end-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-es-* {
+        border-end-start-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-ee-* {
+        border-end-end-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+
+      :root {
+        --shape: round;
+        --shape-multiplier: 1;
+
+        --background: #f4f6f8;
+        --foreground: #0f1f3d;
+        --primary: #0f1f3d;
+        --primary-foreground: #ffffff;
+        --secondary: #f59e0b;
+        --secondary-foreground: #ffffff;
+        --muted: #e2e8f0;
+        --muted-foreground: #64748b;
+        --accent: #00d0b6;
+        --accent-foreground: #00332d;
+        --destructive: #dc2626;
+        --card: #ffffff;
+        --card-foreground: #0f1f3d;
+        --popover: #ffffff;
+        --popover-foreground: #0f1f3d;
+        --border: #e2e8f0;
+        --input: #ffffff;
+        --ring: #00d0b6;
+        --chart-1: #00d0b6;
+        --chart-2: #f59e0b;
+        --chart-3: #0f1f3d;
+        --chart-4: #38bdf8;
+        --chart-5: #ef4444;
+
+        --font-sans: "Inter";
+        --font-heading: "Inter";
+        --font-serif: "Playfair Display";
+        --font-mono: "JetBrains Mono";
+
+        --radius: 0.75rem;
+      }
+
+      /* Prevent layout shift for icons without explicit dimensions */
+      iconify-icon:not([width]):not([height]) {
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+      }
+
+      /* Hide scrollbars */
+      *,
+      *::before,
+      *::after {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      *::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="flex flex-col h-screen bg-background text-foreground font-sans">
+      <header class="bg-card border-b border-border pt-12 pb-5 px-6 sticky top-0 z-20">
+        <div class="flex items-center justify-between">
+          <h1 class="text-2xl font-heading font-bold text-primary">Histórico</h1>
+          <button
+            class="bg-muted w-10 h-10 rounded-full flex items-center justify-center text-primary"
+          >
+            <iconify-icon icon="ph:calendar-bold" width="20" height="20"></iconify-icon>
+          </button>
+        </div>
+      </header>
+      <main class="flex-1 overflow-y-auto pb-24">
+        <section class="mt-4">
+          <div class="px-6 py-3 bg-muted/50 sticky top-0 z-10 backdrop-blur-md">
+            <h2 class="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+              Hoje, 24 Nov
+            </h2>
+          </div>
+          <div class="divide-y divide-border/50">
+            <div
+              class="flex items-center gap-4 px-6 py-4 bg-card active:bg-muted/30 transition-colors"
+            >
+              <div class="flex flex-col items-center shrink-0 w-14">
+                <span class="text-lg font-bold tabular-nums text-primary">08:58</span
+                ><span class="text-[10px] font-bold text-accent uppercase">Entrada</span>
+              </div>
+              <div class="h-8 w-px bg-border mx-2"></div>
+              <div class="flex-1 flex flex-col min-w-0">
+                <div class="flex items-center gap-1.5">
+                  <iconify-icon
+                    icon="ph:map-pin-fill"
+                    class="text-muted-foreground"
+                    width="14"
+                    height="14"
+                  ></iconify-icon
+                  ><span class="text-sm font-medium truncate"
+                    >Av. Eng. Luís Carlos Berrini, 1500</span
+                  >
+                </div>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                  <iconify-icon
+                    icon="ph:check-circle-fill"
+                    class="text-accent"
+                    width="14"
+                    height="14"
+                  ></iconify-icon
+                  ><span class="text-xs text-muted-foreground">Sincronizado</span>
+                </div>
+              </div>
+              <iconify-icon
+                icon="ph:caret-right-bold"
+                class="text-muted-foreground"
+                width="16"
+                height="16"
+              ></iconify-icon>
+            </div>
+            <div
+              class="flex items-center gap-4 px-6 py-4 bg-card active:bg-muted/30 transition-colors"
+            >
+              <div class="flex flex-col items-center shrink-0 w-14">
+                <span class="text-lg font-bold tabular-nums text-primary">08:02</span
+                ><span class="text-[10px] font-bold text-accent uppercase">Entrada</span>
+              </div>
+              <div class="h-8 w-px bg-border mx-2"></div>
+              <div class="flex-1 flex flex-col min-w-0">
+                <div class="flex items-center gap-1.5">
+                  <iconify-icon
+                    icon="ph:map-pin-fill"
+                    class="text-muted-foreground"
+                    width="14"
+                    height="14"
+                  ></iconify-icon
+                  ><span class="text-sm font-medium truncate">Rua Tabapuã, 474</span>
+                </div>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                  <iconify-icon
+                    icon="ph:arrows-clockwise-bold"
+                    class="text-secondary"
+                    width="14"
+                    height="14"
+                  ></iconify-icon
+                  ><span class="text-xs text-secondary font-medium">Sincronização pendente</span>
+                </div>
+              </div>
+              <iconify-icon
+                icon="ph:caret-right-bold"
+                class="text-muted-foreground"
+                width="16"
+                height="16"
+              ></iconify-icon>
+            </div>
+          </div>
+        </section>
+        <section class="mt-4">
+          <div class="px-6 py-3 bg-muted/50 sticky top-0 z-10 backdrop-blur-md">
+            <h2 class="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+              Ontem, 23 Nov
+            </h2>
+          </div>
+          <div class="divide-y divide-border/50">
+            <div
+              class="flex items-center gap-4 px-6 py-4 bg-card active:bg-muted/30 transition-colors"
+            >
+              <div class="flex flex-col items-center shrink-0 w-14">
+                <span class="text-lg font-bold tabular-nums text-primary">18:05</span
+                ><span class="text-[10px] font-bold text-primary uppercase">Saída</span>
+              </div>
+              <div class="h-8 w-px bg-border mx-2"></div>
+              <div class="flex-1 flex flex-col min-w-0">
+                <div class="flex items-center gap-1.5">
+                  <iconify-icon
+                    icon="ph:map-pin-fill"
+                    class="text-muted-foreground"
+                    width="14"
+                    height="14"
+                  ></iconify-icon
+                  ><span class="text-sm font-medium truncate"
+                    >Av. Eng. Luís Carlos Berrini, 1500</span
+                  >
+                </div>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                  <iconify-icon
+                    icon="ph:check-circle-fill"
+                    class="text-accent"
+                    width="14"
+                    height="14"
+                  ></iconify-icon
+                  ><span class="text-xs text-muted-foreground">Sincronizado</span>
+                </div>
+              </div>
+              <iconify-icon
+                icon="ph:caret-right-bold"
+                class="text-muted-foreground"
+                width="16"
+                height="16"
+              ></iconify-icon>
+            </div>
+            <div
+              class="flex items-center gap-4 px-6 py-4 bg-card active:bg-muted/30 transition-colors"
+            >
+              <div class="flex flex-col items-center shrink-0 w-14">
+                <span class="text-lg font-bold tabular-nums text-primary">13:02</span
+                ><span class="text-[10px] font-bold text-secondary uppercase">Retorno</span>
+              </div>
+              <div class="h-8 w-px bg-border mx-2"></div>
+              <div class="flex-1 flex flex-col min-w-0">
+                <div class="flex items-center gap-1.5">
+                  <iconify-icon
+                    icon="ph:map-pin-fill"
+                    class="text-muted-foreground"
+                    width="14"
+                    height="14"
+                  ></iconify-icon
+                  ><span class="text-sm font-medium truncate"
+                    >Berrini Mall - Praça de Alimentação</span
+                  >
+                </div>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                  <iconify-icon
+                    icon="ph:check-circle-fill"
+                    class="text-accent"
+                    width="14"
+                    height="14"
+                  ></iconify-icon
+                  ><span class="text-xs text-muted-foreground">Sincronizado</span>
+                </div>
+              </div>
+              <iconify-icon
+                icon="ph:caret-right-bold"
+                class="text-muted-foreground"
+                width="16"
+                height="16"
+              ></iconify-icon>
+            </div>
+            <div
+              class="flex items-center gap-4 px-6 py-4 bg-card active:bg-muted/30 transition-colors"
+            >
+              <div class="flex flex-col items-center shrink-0 w-14">
+                <span class="text-lg font-bold tabular-nums text-primary">12:01</span
+                ><span class="text-[10px] font-bold text-secondary uppercase">Almoço</span>
+              </div>
+              <div class="h-8 w-px bg-border mx-2"></div>
+              <div class="flex-1 flex flex-col min-w-0">
+                <div class="flex items-center gap-1.5">
+                  <iconify-icon
+                    icon="ph:map-pin-fill"
+                    class="text-muted-foreground"
+                    width="14"
+                    height="14"
+                  ></iconify-icon
+                  ><span class="text-sm font-medium truncate"
+                    >Av. Eng. Luís Carlos Berrini, 1500</span
+                  >
+                </div>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                  <iconify-icon
+                    icon="ph:check-circle-fill"
+                    class="text-accent"
+                    width="14"
+                    height="14"
+                  ></iconify-icon
+                  ><span class="text-xs text-muted-foreground">Sincronizado</span>
+                </div>
+              </div>
+              <iconify-icon
+                icon="ph:caret-right-bold"
+                class="text-muted-foreground"
+                width="16"
+                height="16"
+              ></iconify-icon>
+            </div>
+          </div>
+        </section>
+      </main>
+      <nav
+        class="absolute bottom-0 w-full bg-card border-t border-border flex items-center justify-between pb-safe pt-2 px-6 h-20 shadow-[0_-4px_24px_rgba(0,0,0,0.02)] z-10"
+      >
+        <button
+          class="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground transition-colors flex-1"
+        >
+          <iconify-icon icon="ph:clock-bold" width="24" height="24"></iconify-icon
+          ><span class="text-[10px] font-medium">Bater Ponto</span></button
+        ><button class="flex flex-col items-center gap-1 text-primary flex-1">
+          <iconify-icon icon="ph:list-dashes-fill" width="24" height="24"></iconify-icon
+          ><span class="text-[10px] font-semibold">Histórico</span></button
+        ><button
+          class="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground transition-colors flex-1"
+        >
+          <iconify-icon icon="ph:user-bold" width="24" height="24"></iconify-icon
+          ><span class="text-[10px] font-medium">Perfil</span>
+        </button>
+      </nav>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js"></script>
+    <style type="text/tailwindcss">
+      @theme inline {
+        --color-background: var(--background);
+        --color-foreground: var(--foreground);
+        --color-primary: var(--primary);
+        --color-primary-foreground: var(--primary-foreground);
+        --color-secondary: var(--secondary);
+        --color-secondary-foreground: var(--secondary-foreground);
+        --color-muted: var(--muted);
+        --color-muted-foreground: var(--muted-foreground);
+        --color-accent: var(--accent);
+        --color-accent-foreground: var(--accent-foreground);
+        --color-destructive: var(--destructive);
+        --color-card: var(--card);
+        --color-card-foreground: var(--card-foreground);
+        --color-popover: var(--popover);
+        --color-popover-foreground: var(--popover-foreground);
+        --color-border: var(--border);
+        --color-input: var(--input);
+        --color-ring: var(--ring);
+        --color-chart-1: var(--chart-1);
+        --color-chart-2: var(--chart-2);
+        --color-chart-3: var(--chart-3);
+        --color-chart-4: var(--chart-4);
+        --color-chart-5: var(--chart-5);
+
+        --font-font-sans: var(--font-sans);
+        --font-font-heading: var(--font-heading);
+        --font-font-serif: var(--font-serif);
+        --font-font-mono: var(--font-mono);
+      }
+
+      @theme {
+        --radius-xs: calc(var(--radius) - 8px);
+        --radius-sm: calc(var(--radius) - 4px);
+        --radius-md: calc(var(--radius) - 2px);
+        --radius-lg: var(--radius);
+        --radius-xl: calc(var(--radius) + 4px);
+        --radius-2xl: calc(var(--radius) + 8px);
+        --radius-3xl: calc(var(--radius) + 16px);
+        --radius-4xl: calc(var(--radius) + 24px);
+      }
+
+      * {
+        corner-shape: var(--shape, round);
+      }
+
+      .rounded-full,
+      .rounded-none,
+      .rounded-t-full,
+      .rounded-t-none,
+      .rounded-r-full,
+      .rounded-r-none,
+      .rounded-b-full,
+      .rounded-b-none,
+      .rounded-l-full,
+      .rounded-l-none,
+      .rounded-s-full,
+      .rounded-s-none,
+      .rounded-e-full,
+      .rounded-e-none,
+      .rounded-tl-full,
+      .rounded-tl-none,
+      .rounded-tr-full,
+      .rounded-tr-none,
+      .rounded-bl-full,
+      .rounded-bl-none,
+      .rounded-br-full,
+      .rounded-br-none,
+      .rounded-ss-full,
+      .rounded-ss-none,
+      .rounded-se-full,
+      .rounded-se-none,
+      .rounded-es-full,
+      .rounded-es-none,
+      .rounded-ee-full,
+      .rounded-ee-none {
+        corner-shape: round;
+      }
+
+      @utility rounded-* {
+        border-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-t-* {
+        border-top-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-top-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-r-* {
+        border-top-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-bottom-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-b-* {
+        border-bottom-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-bottom-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-l-* {
+        border-top-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-bottom-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-tl-* {
+        border-top-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-tr-* {
+        border-top-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-bl-* {
+        border-bottom-left-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-br-* {
+        border-bottom-right-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-s-* {
+        border-start-start-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-end-start-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-e-* {
+        border-start-end-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+        border-end-end-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-ss-* {
+        border-start-start-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-se-* {
+        border-start-end-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-es-* {
+        border-end-start-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+      @utility rounded-ee-* {
+        border-end-end-radius: calc(
+          --value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1)
+        );
+      }
+
+      :root {
+        --shape: round;
+        --shape-multiplier: 1;
+
+        --background: #f4f6f8;
+        --foreground: #0f1f3d;
+        --primary: #0f1f3d;
+        --primary-foreground: #ffffff;
+        --secondary: #f59e0b;
+        --secondary-foreground: #ffffff;
+        --muted: #e2e8f0;
+        --muted-foreground: #64748b;
+        --accent: #00d0b6;
+        --accent-foreground: #00332d;
+        --destructive: #dc2626;
+        --card: #ffffff;
+        --card-foreground: #0f1f3d;
+        --popover: #ffffff;
+        --popover-foreground: #0f1f3d;
+        --border: #e2e8f0;
+        --input: #ffffff;
+        --ring: #00d0b6;
+        --chart-1: #00d0b6;
+        --chart-2: #f59e0b;
+        --chart-3: #0f1f3d;
+        --chart-4: #38bdf8;
+        --chart-5: #ef4444;
+
+        --font-sans: "Inter";
+        --font-heading: "Inter";
+        --font-serif: "Playfair Display";
+        --font-mono: "JetBrains Mono";
+
+        --radius: 0.75rem;
+      }
+
+      /* Prevent layout shift for icons without explicit dimensions */
+      iconify-icon:not([width]):not([height]) {
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+      }
+
+      /* Hide scrollbars */
+      *,
+      *::before,
+      *::after {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      *::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="flex flex-col h-screen bg-background text-foreground px-8 font-sans">
+      <div class="flex-1 flex flex-col justify-center gap-12 max-w-sm mx-auto w-full">
+        <div class="flex flex-col items-center gap-3">
+          <div
+            class="bg-primary text-primary-foreground p-4 rounded-3xl shadow-lg shadow-primary/20"
+          >
+            <iconify-icon icon="ph:timer-bold" width="48" height="48"></iconify-icon>
+          </div>
+          <div class="text-center">
+            <h1 class="text-4xl font-heading font-bold text-primary tracking-tight">Cronos</h1>
+            <p class="text-muted-foreground font-medium mt-1">Controle de ponto seguro e preciso</p>
+          </div>
+        </div>
+        <div class="flex flex-col gap-6">
+          <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-2">
+              <label
+                for="email"
+                class="text-xs font-bold text-muted-foreground uppercase tracking-widest ml-1"
+                >E-mail corporativo</label
+              ><input
+                id="email"
+                type="email"
+                class="bg-input border border-border h-14 rounded-2xl px-5 text-base focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition-all"
+                placeholder="nome.sobrenome@empresa.com"
+              />
+            </div>
+            <div class="flex flex-col gap-2">
+              <label
+                for="password"
+                class="text-xs font-bold text-muted-foreground uppercase tracking-widest ml-1"
+                >Senha</label
+              >
+              <div class="relative">
+                <input
+                  id="password"
+                  type="password"
+                  class="bg-input border border-border h-14 rounded-2xl px-5 w-full text-base focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition-all"
+                  placeholder="••••••••"
+                /><button class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  <iconify-icon icon="ph:eye-bold" width="20" height="20"></iconify-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+          <button
+            class="bg-primary text-primary-foreground h-14 rounded-full font-heading font-bold text-lg hover:bg-primary/90 active:scale-95 transition-all shadow-lg shadow-primary/20"
+          >
+            Entrar
+          </button>
+          <div class="flex flex-col items-center gap-4">
+            <a
+              href="#"
+              class="text-sm font-semibold text-primary/70 hover:text-primary transition-colors"
+              >Esqueci minha senha</a
+            >
+            <div class="flex items-center gap-4 w-full px-4">
+              <div class="h-px bg-border flex-1"></div>
+              <span class="text-xs font-bold text-muted-foreground uppercase tracking-widest"
+                >Acesso Restrito</span
+              >
+              <div class="h-px bg-border flex-1"></div>
+            </div>
+            <p
+              class="text-[10px] text-muted-foreground text-center uppercase leading-relaxed tracking-wider"
+            >
+              Ao entrar, você concorda com os termos de uso e políticas de privacidade da sua
+              empresa.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

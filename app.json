@@ -1,0 +1,64 @@
+{
+  "expo": {
+    "name": "Cronos",
+    "slug": "cronos-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "O Cronos usa sua localização para registrar onde cada marcação de ponto foi feita.",
+        "NSCameraUsageDescription": "O Cronos usa a câmera para tirar a selfie obrigatória de cada marcação de ponto."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "CAMERA"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-sqlite",
+      "expo-secure-store",
+      "expo-font",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "O Cronos usa sua localização para registrar onde cada marcação de ponto foi feita."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "O Cronos usa a câmera para tirar a selfie obrigatória de cada marcação de ponto."
+        }
+      ],
+      "expo-sharing",
+      "expo-document-picker",
+      [
+        "expo-notifications",
+        {
+          "color": "#0F1F3D"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "SUBSTITUA_PELO_PROJECT_ID_DO_EAS"
+      }
+    }
+  }
+}
