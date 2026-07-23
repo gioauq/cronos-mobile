@@ -11,6 +11,10 @@ export type CurrentUser = {
   requires_selfie: boolean;
   requires_location: boolean;
   work_unit: (Omit<WorkUnit, 'latitude' | 'longitude'> & { latitude: string; longitude: string }) | null;
+  registration_number: string | null;
+  department: string | null;
+  admission_date: string | null;
+  photo_path: string | null;
 };
 
 export type FetchedUser = AppUser;
@@ -39,5 +43,9 @@ export async function fetchCurrentUser(): Promise<FetchedUser> {
     requiresSelfie: raw.requires_selfie,
     requiresLocation: raw.requires_location,
     workUnit,
+    registrationNumber: raw.registration_number,
+    department: raw.department,
+    admissionDate: raw.admission_date,
+    hasPhoto: !!raw.photo_path,
   };
 }

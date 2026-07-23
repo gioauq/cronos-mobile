@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { ActivityIndicator, Alert, Linking, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import * as Sharing from 'expo-sharing';
-import { ArrowLeft, Camera, CaretLeft, CaretRight, DownloadSimple, MapPin, Receipt, Warning } from 'phosphor-react-native';
+import { ArrowLeft, CalendarBlank, Camera, CaretLeft, CaretRight, FilePdf, MapPin, Receipt, Warning } from 'phosphor-react-native';
 import { colors, fontFamily, radius, spacing } from '../theme';
 import { downloadPunchReceipt, downloadTimesheetPdf, fetchTimesheet, TimesheetResponse } from '../api/profile';
 import { useAsyncAction } from '../hooks/useAsyncAction';
@@ -18,15 +18,6 @@ const STATUS_LABELS: Record<Day['status'], string> = {
   processed: 'Normal',
 };
 
-const STATUS_COLORS: Record<Day['status'], string> = {
-  not_calculated: colors.mutedForeground,
-  falta: colors.destructive,
-  absence: colors.secondary,
-  holiday: colors.accent,
-  day_off: colors.mutedForeground,
-  processed: colors.primary,
-};
-
 function monthKey(offset: number) {
   const d = new Date();
   d.setDate(1);
@@ -38,6 +29,26 @@ function formatMonthLabel(month: string) {
   const [year, m] = month.split('-').map(Number);
   const label = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(new Date(year, m - 1, 1));
   return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+/** Converte horas decimais (ex: 15.33) em "HH:MM" (ex: "15:20") — o formato usado no desenho. */
+function formatHoursAsClock(hours: number): string {
+  const totalMinutes = Math.round(Math.abs(hours) * 60);
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+/** Agrupa as marcações do dia em pares entrada/saída ("08:00 - 12:00 | 13:00 - 18:00"). */
+function formatShiftRanges(punches: Day['punches']): string {
+  if (punches.length === 0) return '';
+  const ranges: string[] = [];
+  for (let i = 0; i < punches.length; i += 2) {
+    const start = punches[i].time;
+    const end = punches[i + 1]?.time;
+    ranges.push(end ? `${start} - ${end}` : start);
+  }
+  return ranges.join(' | ');
 }
 
 export function TimesheetScreen() {
@@ -82,6 +93,8 @@ export function TimesheetScreen() {
   );
 
   const balance = data?.total_balance_hours ?? 0;
+  const overtimeTotal = (data?.days ?? []).reduce((sum, day) => sum + Math.max(day.balance_hours, 0), 0);
+  const shortfallTotal = (data?.days ?? []).reduce((sum, day) => sum + Math.max(-day.balance_hours, 0), 0);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -90,21 +103,15 @@ export function TimesheetScreen() {
           <ArrowLeft size={22} color={colors.primary} weight="bold" />
         </Pressable>
         <Text style={styles.title}>Meu Ponto</Text>
-        <View style={styles.iconButton} />
-      </View>
-
-      <View style={styles.monthNav}>
-        <Pressable onPress={() => setMonthOffset((o) => o - 1)} hitSlop={12} style={styles.iconButton}>
-          <CaretLeft size={20} color={colors.primary} weight="bold" />
-        </Pressable>
-        <Text style={styles.monthLabel}>{formatMonthLabel(month)}</Text>
-        <Pressable
-          onPress={() => setMonthOffset((o) => Math.min(o + 1, 0))}
-          hitSlop={12}
-          style={styles.iconButton}
-          disabled={monthOffset >= 0}
-        >
-          <CaretRight size={20} color={monthOffset >= 0 ? colors.muted : colors.primary} weight="bold" />
+        <Pressable style={styles.pdfButton} onPress={handleDownload} disabled={downloading} hitSlop={8}>
+          {downloading ? (
+            <ActivityIndicator size="small" color={colors.primaryForeground} />
+          ) : (
+            <>
+              <FilePdf size={16} color={colors.primaryForeground} weight="bold" />
+              <Text style={styles.pdfButtonLabel}>PDF</Text>
+            </>
+          )}
         </Pressable>
       </View>
 
@@ -119,28 +126,44 @@ export function TimesheetScreen() {
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.content}>
-          <View style={styles.balanceCard}>
-            <Text style={styles.balanceLabel}>Saldo do Banco de Horas</Text>
-            <Text style={[styles.balanceValue, { color: balance >= 0 ? colors.accent : colors.destructive }]}>
-              {balance > 0 ? '+' : ''}
-              {balance}h
-            </Text>
+          <View style={styles.periodRow}>
+            <View>
+              <Text style={styles.periodLabel}>Período Selecionado</Text>
+              <View style={styles.monthNav}>
+                <Pressable onPress={() => setMonthOffset((o) => o - 1)} hitSlop={12}>
+                  <CaretLeft size={18} color={colors.primary} weight="bold" />
+                </Pressable>
+                <Text style={styles.monthValue}>{formatMonthLabel(month)}</Text>
+                <Pressable onPress={() => setMonthOffset((o) => Math.min(o + 1, 0))} hitSlop={12} disabled={monthOffset >= 0}>
+                  <CaretRight size={18} color={monthOffset >= 0 ? colors.muted : colors.primary} weight="bold" />
+                </Pressable>
+              </View>
+            </View>
+            <View style={styles.balancePill}>
+              <Text style={styles.balancePillLabel}>Saldo Total</Text>
+              <Text style={[styles.balancePillValue, { color: balance >= 0 ? colors.accent : colors.destructive }]}>
+                {balance >= 0 ? '+' : '-'}
+                {formatHoursAsClock(balance)}
+              </Text>
+            </View>
           </View>
 
-          <Pressable style={styles.downloadButton} onPress={handleDownload} disabled={downloading}>
-            {downloading ? (
-              <ActivityIndicator color={colors.primaryForeground} />
-            ) : (
-              <>
-                <DownloadSimple size={18} color={colors.primaryForeground} weight="bold" />
-                <Text style={styles.downloadLabel}>Baixar Comprovante PDF</Text>
-              </>
-            )}
-          </Pressable>
+          <View style={styles.statGrid}>
+            <View style={styles.statCard}>
+              <Text style={styles.statLabel}>Horas Extras</Text>
+              <Text style={[styles.statValue, { color: colors.accent }]}>{formatHoursAsClock(overtimeTotal)}</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statLabel}>Atrasos/Faltas</Text>
+              <Text style={[styles.statValue, { color: colors.destructive }]}>{formatHoursAsClock(shortfallTotal)}</Text>
+            </View>
+          </View>
 
-          <View style={styles.daysCard}>
-            {data?.days.map((day, index) => (
-              <DayRow key={day.date} day={day} isLast={index === data.days.length - 1} />
+          <Text style={styles.sectionLabel}>Detalhamento Diário</Text>
+
+          <View style={styles.daysList}>
+            {data?.days.map((day) => (
+              <DayCard key={day.date} day={day} />
             ))}
           </View>
         </ScrollView>
@@ -163,53 +186,58 @@ async function handlePunchReceiptDownload(punchId: number) {
   }
 }
 
-function DayRow({ day, isLast }: { day: Day; isLast: boolean }) {
+function DayCard({ day }: { day: Day }) {
   const dateObj = new Date(`${day.date}T00:00:00`);
   const label = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short', weekday: 'short' }).format(dateObj);
-  const statusColor = STATUS_COLORS[day.status] ?? colors.mutedForeground;
+  const shiftRanges = formatShiftRanges(day.punches);
+  const deltaColor = day.balance_hours > 0 ? colors.accent : day.balance_hours < 0 ? colors.destructive : colors.mutedForeground;
+  const deltaSign = day.balance_hours > 0 ? '+' : day.balance_hours < 0 ? '-' : '';
 
   return (
-    <View style={[styles.dayRow, !isLast && styles.dayRowBorder]}>
-      <View style={styles.dayDate}>
-        <Text style={styles.dayDateText}>{label}</Text>
+    <View style={styles.dayCard}>
+      <View style={styles.dayCardTop}>
+        <Text style={styles.dayDate}>{label}</Text>
+        <Text style={styles.dayWorked}>{formatHoursAsClock(day.worked_hours)}h</Text>
       </View>
-      <View style={styles.dayPunches}>
-        {day.punches.length > 0 ? (
-          <View style={styles.punchList}>
-            {day.punches.map((punch, index) => (
-              <View key={`${punch.time}-${index}`} style={styles.punchItem}>
-                <Text style={styles.dayPunchesText}>{punch.time}</Text>
-                {punch.selfie_url && (
-                  <Pressable onPress={() => Linking.openURL(punch.selfie_url!)} hitSlop={6} accessibilityLabel="Ver foto da marcação">
-                    <Camera size={13} color={colors.primary} weight="fill" />
-                  </Pressable>
-                )}
-                {punch.latitude && punch.longitude && (
-                  <Pressable
-                    onPress={() => Linking.openURL(`https://www.google.com/maps?q=${punch.latitude},${punch.longitude}`)}
-                    hitSlop={6}
-                    accessibilityLabel="Ver localização da marcação"
-                  >
-                    <MapPin size={13} color={colors.primary} weight="fill" />
-                  </Pressable>
-                )}
-                <Pressable onPress={() => handlePunchReceiptDownload(punch.id)} hitSlop={6} accessibilityLabel="Baixar comprovante desta marcação">
-                  <Receipt size={13} color={colors.primary} weight="fill" />
-                </Pressable>
-              </View>
-            ))}
+      <View style={styles.dayCardBottom}>
+        {shiftRanges ? (
+          <View style={styles.punchRow}>
+            <Text style={styles.dayDetail}>{shiftRanges}</Text>
+            {day.punches.some((p) => p.selfie_url) && (
+              <Pressable onPress={() => Linking.openURL(day.punches.find((p) => p.selfie_url)!.selfie_url!)} hitSlop={6} accessibilityLabel="Ver foto da marcação">
+                <Camera size={13} color={colors.mutedForeground} weight="fill" />
+              </Pressable>
+            )}
+            {day.punches.some((p) => p.latitude && p.longitude) && (
+              <Pressable
+                onPress={() => {
+                  const p = day.punches.find((p) => p.latitude && p.longitude)!;
+                  Linking.openURL(`https://www.google.com/maps?q=${p.latitude},${p.longitude}`);
+                }}
+                hitSlop={6}
+                accessibilityLabel="Ver localização da marcação"
+              >
+                <MapPin size={13} color={colors.mutedForeground} weight="fill" />
+              </Pressable>
+            )}
+            <Pressable onPress={() => handlePunchReceiptDownload(day.punches[0].id)} hitSlop={6} accessibilityLabel="Baixar comprovante desta marcação">
+              <Receipt size={13} color={colors.mutedForeground} weight="fill" />
+            </Pressable>
           </View>
         ) : (
-          <Text style={styles.dayPunchesText}>—</Text>
+          <Text style={styles.dayDetail}>{STATUS_LABELS[day.status] ?? day.status}</Text>
         )}
-        {day.has_inconsistency && <Text style={styles.dayInconsistency}>Inconsistência</Text>}
-      </View>
-      <View style={styles.dayHours}>
-        <Text style={styles.dayHoursText}>
-          {day.worked_hours}h / {day.expected_hours}h
+        <Text style={[styles.dayDelta, { color: deltaColor }]}>
+          {deltaSign}
+          {formatHoursAsClock(day.balance_hours)}
         </Text>
-        <Text style={[styles.dayStatus, { color: statusColor }]}>{STATUS_LABELS[day.status] ?? day.status}</Text>
       </View>
+      {day.has_inconsistency && (
+        <View style={styles.inconsistencyBadge}>
+          <CalendarBlank size={11} color={colors.destructive} weight="bold" />
+          <Text style={styles.inconsistencyText}>Inconsistência</Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -228,62 +256,64 @@ const styles = StyleSheet.create({
   },
   iconButton: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
   title: { fontFamily: fontFamily.bold, fontSize: 18, color: colors.primary },
-  monthNav: {
+  pdfButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 6,
+    backgroundColor: colors.primary,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 8,
+    minWidth: 64,
     justifyContent: 'center',
-    gap: spacing.lg,
-    paddingVertical: spacing.sm,
-    backgroundColor: colors.card,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
   },
-  monthLabel: { fontFamily: fontFamily.semiBold, fontSize: 14, color: colors.foreground, minWidth: 160, textAlign: 'center' },
+  pdfButtonLabel: { fontFamily: fontFamily.bold, fontSize: 12, color: colors.primaryForeground },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.sm, padding: spacing.xl },
   errorText: { fontFamily: fontFamily.medium, color: colors.destructive, textAlign: 'center' },
-  content: { padding: spacing.lg, gap: spacing.md, paddingBottom: spacing.xl },
-  balanceCard: {
-    backgroundColor: colors.primary,
-    borderRadius: radius.xl,
-    padding: spacing.lg,
+  content: { padding: spacing.lg, gap: spacing.lg, paddingBottom: spacing.xl },
+  periodRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
+  periodLabel: { fontFamily: fontFamily.bold, fontSize: 11, color: colors.mutedForeground, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 },
+  monthNav: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  monthValue: { fontFamily: fontFamily.bold, fontSize: 18, color: colors.primary },
+  balancePill: {
+    backgroundColor: `${colors.accent}1F`,
+    borderRadius: radius.lg,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
     alignItems: 'center',
-    gap: 4,
+    gap: 2,
   },
-  balanceLabel: { fontFamily: fontFamily.semiBold, fontSize: 12, color: `${colors.primaryForeground}CC`, textTransform: 'uppercase', letterSpacing: 1 },
-  balanceValue: { fontFamily: fontFamily.extraBold, fontSize: 32 },
-  downloadButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-    backgroundColor: colors.primary,
-    borderRadius: radius.md,
-    paddingVertical: spacing.md,
-  },
-  downloadLabel: { fontFamily: fontFamily.semiBold, fontSize: 14, color: colors.primaryForeground },
-  daysCard: {
+  balancePillLabel: { fontFamily: fontFamily.bold, fontSize: 10, color: colors.accentForeground, textTransform: 'uppercase', letterSpacing: 0.5 },
+  balancePillValue: { fontFamily: fontFamily.extraBold, fontSize: 20 },
+  statGrid: { flexDirection: 'row', gap: spacing.md },
+  statCard: {
+    flex: 1,
     backgroundColor: colors.card,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radius.xl,
-    overflow: 'hidden',
+    padding: spacing.md,
+    gap: 4,
   },
-  dayRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+  statLabel: { fontFamily: fontFamily.bold, fontSize: 10, color: colors.mutedForeground, textTransform: 'uppercase', letterSpacing: 0.5 },
+  statValue: { fontFamily: fontFamily.extraBold, fontSize: 22 },
+  sectionLabel: { fontFamily: fontFamily.bold, fontSize: 11, color: colors.mutedForeground, textTransform: 'uppercase', letterSpacing: 0.5 },
+  daysList: { gap: spacing.sm },
+  dayCard: {
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    padding: spacing.md,
+    gap: 6,
   },
-  dayRowBorder: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.border },
-  dayDate: { width: 56 },
-  dayDateText: { fontFamily: fontFamily.bold, fontSize: 12, color: colors.primary, textTransform: 'capitalize' },
-  dayPunches: { flex: 1, gap: 2 },
-  punchList: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  punchItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  dayPunchesText: { fontFamily: fontFamily.regular, fontSize: 12, color: colors.foreground },
-  dayInconsistency: { fontFamily: fontFamily.semiBold, fontSize: 10, color: colors.destructive, textTransform: 'uppercase' },
-  dayHours: { alignItems: 'flex-end', gap: 2 },
-  dayHoursText: { fontFamily: fontFamily.medium, fontSize: 12, color: colors.foreground },
-  dayStatus: { fontFamily: fontFamily.bold, fontSize: 10, textTransform: 'uppercase' },
+  dayCardTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  dayDate: { fontFamily: fontFamily.bold, fontSize: 14, color: colors.foreground, textTransform: 'capitalize' },
+  dayWorked: { fontFamily: fontFamily.bold, fontSize: 14, color: colors.foreground },
+  dayCardBottom: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  punchRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, flexShrink: 1 },
+  dayDetail: { fontFamily: fontFamily.regular, fontSize: 12, color: colors.mutedForeground },
+  dayDelta: { fontFamily: fontFamily.bold, fontSize: 12 },
+  inconsistencyBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  inconsistencyText: { fontFamily: fontFamily.semiBold, fontSize: 10, color: colors.destructive, textTransform: 'uppercase' },
 });

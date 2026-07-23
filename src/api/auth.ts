@@ -8,9 +8,9 @@ export type LoginResponse = {
   user: AuthUser;
 };
 
-export async function login(email: string, password: string, deviceName: string): Promise<LoginResponse> {
+export async function login(registrationNumber: string, password: string, deviceName: string): Promise<LoginResponse> {
   const response = await api.post<LoginResponse>('/login', {
-    email,
+    registration_number: registrationNumber,
     password,
     device_name: deviceName,
   });

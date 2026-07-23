@@ -16,22 +16,23 @@ import { useAsyncAction } from '../hooks/useAsyncAction';
 
 export function LoginScreen() {
   const { signIn } = useAuth();
-  const [email, setEmail] = useState('');
+  const [registrationNumber, setRegistrationNumber] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const { run: submit, isLoading: isSubmitting } = useAsyncAction(
-    (emailValue: string, passwordValue: string) => signIn(emailValue, passwordValue),
+    (registrationNumberValue: string, passwordValue: string) => signIn(registrationNumberValue, passwordValue),
     (err: any) => {
-      const message = err?.response?.data?.errors?.email?.[0] ?? 'Não foi possível entrar. Verifique suas credenciais e a conexão.';
+      const message =
+        err?.response?.data?.errors?.registration_number?.[0] ?? 'Não foi possível entrar. Verifique suas credenciais e a conexão.';
       setError(message);
     }
   );
 
   const handleSubmit = () => {
     setError(null);
-    submit(email.trim(), password);
+    submit(registrationNumber.trim(), password);
   };
 
   return (
@@ -50,15 +51,15 @@ export function LoginScreen() {
 
         <View style={styles.form}>
           <View style={styles.field}>
-            <Text style={styles.label}>E-mail corporativo</Text>
+            <Text style={styles.label}>Matrícula</Text>
             <TextInput
-              value={email}
-              onChangeText={setEmail}
-              placeholder="nome.sobrenome@empresa.com"
+              value={registrationNumber}
+              onChangeText={setRegistrationNumber}
+              placeholder="Digite sua matrícula"
               placeholderTextColor={colors.mutedForeground}
               autoCapitalize="none"
               autoCorrect={false}
-              keyboardType="email-address"
+              autoComplete="username"
               style={styles.input}
             />
           </View>
@@ -88,7 +89,7 @@ export function LoginScreen() {
 
           <Pressable
             style={({ pressed }) => [styles.submitButton, pressed && styles.submitButtonPressed]}
-            disabled={isSubmitting || !email || !password}
+            disabled={isSubmitting || !registrationNumber || !password}
             onPress={handleSubmit}
           >
             {isSubmitting ? (

@@ -1,15 +1,24 @@
 import React from 'react';
-import { Alert, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Briefcase, CalendarCheck, CaretRight, IdentificationCard, PencilSimple, SignOut, User } from 'phosphor-react-native';
+import { Article, Briefcase, CalendarBlank, CaretRight, ChatTeardropText, IdentificationCard, SignOut, User, UserFocus } from 'phosphor-react-native';
 import { colors, fontFamily, radius, spacing } from '../theme';
 import { useAuth } from '../context/AuthContext';
+import { authHeader, profilePhotoUrl } from '../api/profile';
 
 const ROLE_LABELS: Record<string, string> = {
   admin: 'Administrador',
   manager: 'Gestor',
   employee: 'Funcionário',
 };
+
+function formatAdmissionDate(value: string | null): string {
+  if (!value) return '—';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '—';
+  const label = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' }).format(date);
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
 
 export function ProfileScreen() {
   const { user, signOut } = useAuth();
@@ -26,27 +35,43 @@ export function ProfileScreen() {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
-          <View style={styles.avatar}>
-            <User size={48} color={colors.primaryForeground} weight="bold" />
-          </View>
+          {user?.hasPhoto ? (
+            <Image source={{ uri: profilePhotoUrl(), headers: authHeader() }} style={styles.avatarImage} />
+          ) : (
+            <View style={styles.avatar}>
+              <User size={48} color={colors.primaryForeground} weight="bold" />
+            </View>
+          )}
           <Text style={styles.name}>{user?.name}</Text>
           <Text style={styles.role}>{ROLE_LABELS[user?.role ?? ''] ?? user?.role}</Text>
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Informações</Text>
-          <InfoRow icon={<IdentificationCard size={20} color={colors.primary} weight="bold" />} label="E-mail" value={user?.email ?? '—'} />
+          <Text style={styles.cardTitle}>Informações Profissionais</Text>
+          <InfoRow icon={<IdentificationCard size={20} color={colors.primary} weight="bold" />} label="Matrícula" value={user?.registrationNumber ? `#${user.registrationNumber}` : '—'} />
           <View style={styles.separator} />
-          <InfoRow icon={<Briefcase size={20} color={colors.primary} weight="bold" />} label="Perfil de acesso" value={ROLE_LABELS[user?.role ?? ''] ?? user?.role ?? '—'} />
+          <InfoRow icon={<Briefcase size={20} color={colors.primary} weight="bold" />} label="Departamento" value={user?.department ?? '—'} />
+          <View style={styles.separator} />
+          <InfoRow icon={<CalendarBlank size={20} color={colors.primary} weight="bold" />} label="Data de Admissão" value={formatAdmissionDate(user?.admissionDate ?? null)} />
         </View>
 
         <View style={styles.card}>
+          <Pressable style={styles.actionRow} onPress={() => navigation.navigate('EditProfile')}>
+            <View style={styles.actionLeft}>
+              <View style={styles.iconBox}>
+                <UserFocus size={20} color={colors.primary} weight="bold" />
+              </View>
+              <Text style={styles.actionLabel}>Editar Perfil</Text>
+            </View>
+            <CaretRight size={18} color={colors.mutedForeground} />
+          </Pressable>
+          <View style={styles.separator} />
           <Pressable style={styles.actionRow} onPress={() => navigation.navigate('Timesheet')}>
             <View style={styles.actionLeft}>
               <View style={styles.iconBox}>
-                <CalendarCheck size={20} color={colors.primary} weight="bold" />
+                <Article size={20} color={colors.primary} weight="bold" />
               </View>
-              <Text style={styles.actionLabel}>Meu Ponto</Text>
+              <Text style={styles.actionLabel}>Meu Ponto (Espelho)</Text>
             </View>
             <CaretRight size={18} color={colors.mutedForeground} />
           </Pressable>
@@ -54,25 +79,13 @@ export function ProfileScreen() {
           <Pressable style={styles.actionRow} onPress={() => navigation.navigate('Justification')}>
             <View style={styles.actionLeft}>
               <View style={styles.iconBox}>
-                <IdentificationCard size={20} color={colors.primary} weight="bold" />
+                <ChatTeardropText size={20} color={colors.primary} weight="bold" />
               </View>
-              <Text style={styles.actionLabel}>Enviar Justificativa</Text>
+              <Text style={styles.actionLabel}>Justificativas</Text>
             </View>
             <CaretRight size={18} color={colors.mutedForeground} />
           </Pressable>
           <View style={styles.separator} />
-          <Pressable style={styles.actionRow} onPress={() => navigation.navigate('EditProfile')}>
-            <View style={styles.actionLeft}>
-              <View style={styles.iconBox}>
-                <PencilSimple size={20} color={colors.primary} weight="bold" />
-              </View>
-              <Text style={styles.actionLabel}>Editar Perfil</Text>
-            </View>
-            <CaretRight size={18} color={colors.mutedForeground} />
-          </Pressable>
-        </View>
-
-        <View style={styles.card}>
           <Pressable style={styles.actionRow} onPress={confirmSignOut}>
             <View style={styles.actionLeft}>
               <View style={[styles.iconBox, styles.iconBoxDanger]}>
@@ -128,6 +141,15 @@ const styles = StyleSheet.create({
     borderColor: `${colors.accent}66`,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: spacing.sm,
+  },
+  avatarImage: {
+    width: 96,
+    height: 96,
+    borderRadius: radius.full,
+    borderWidth: 3,
+    borderColor: `${colors.accent}66`,
+    backgroundColor: colors.muted,
     marginBottom: spacing.sm,
   },
   name: {

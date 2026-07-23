@@ -90,6 +90,43 @@ export async function downloadPunchReceipt(timeRecordId: number): Promise<string
   return result.uri;
 }
 
+export type JustificationStatus = 'pending' | 'approved' | 'rejected';
+
+export const JUSTIFICATION_STATUS_LABELS: Record<JustificationStatus, string> = {
+  pending: 'Pendente',
+  approved: 'Aprovada',
+  rejected: 'Reprovada',
+};
+
+export type JustificationListItem = {
+  id: number;
+  type: JustificationType;
+  start_date: string;
+  end_date: string;
+  reason: string;
+  status: JustificationStatus;
+  created_at: string;
+};
+
+export async function fetchJustifications(): Promise<JustificationListItem[]> {
+  const response = await api.get<{ data: JustificationListItem[] }>('/server/justifications');
+  return response.data.data;
+}
+
+/**
+ * URL autenticada da própria foto de perfil — não usa Storage::url()/symlink público (o
+ * deploy não tem storage:link), então precisa ir sempre pela rota autenticada e anexar o
+ * mesmo header Authorization do axios (ver <Image source={{ uri, headers }}>).
+ */
+export function profilePhotoUrl(): string {
+  return `${API_BASE_URL}/server/profile/photo`;
+}
+
+export function authHeader(): Record<string, string> {
+  const header = api.defaults.headers.common.Authorization as string | undefined;
+  return header ? { Authorization: header } : {};
+}
+
 export type AttachmentFile = { uri: string; name: string; mimeType: string };
 
 export async function submitJustification(params: {

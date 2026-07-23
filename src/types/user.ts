@@ -21,4 +21,8 @@ export type AppUser = {
   requiresSelfie: boolean;
   requiresLocation: boolean;
   workUnit: WorkUnit | null;
+  registrationNumber: string | null;
+  department: string | null;
+  admissionDate: string | null;
+  hasPhoto: boolean;
 };

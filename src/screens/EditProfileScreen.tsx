@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { ActivityIndicator, Alert, Image, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { ArrowLeft, Camera, FloppyDisk, User } from 'phosphor-react-native';
+import { ArrowLeft, Camera, FloppyDisk, Info, User } from 'phosphor-react-native';
 import { colors, fontFamily, radius, spacing } from '../theme';
 import { useAuth } from '../context/AuthContext';
-import { AttachmentFile, updateProfile } from '../api/profile';
+import { authHeader, AttachmentFile, profilePhotoUrl, updateProfile } from '../api/profile';
 import { useAsyncAction } from '../hooks/useAsyncAction';
 
 export function EditProfileScreen() {
@@ -70,6 +70,8 @@ export function EditProfileScreen() {
         <Pressable style={styles.avatarWrapper} onPress={pickPhoto}>
           {photo ? (
             <Image source={{ uri: photo.uri }} style={styles.avatarImage} />
+          ) : user?.hasPhoto ? (
+            <Image source={{ uri: profilePhotoUrl(), headers: authHeader() }} style={styles.avatarImage} />
           ) : (
             <View style={styles.avatar}>
               <User size={40} color={colors.primaryForeground} weight="bold" />
@@ -81,7 +83,10 @@ export function EditProfileScreen() {
         </Pressable>
         <Text style={styles.avatarHint}>Toque para alterar a foto</Text>
 
-        <Text style={styles.label}>E-mail</Text>
+        <Text style={styles.label}>Nome Completo</Text>
+        <TextInput style={[styles.input, styles.inputDisabled]} value={user?.name ?? ''} editable={false} />
+
+        <Text style={styles.label}>E-mail Corporativo</Text>
         <TextInput
           style={styles.input}
           value={email}
@@ -91,6 +96,14 @@ export function EditProfileScreen() {
           autoCapitalize="none"
           keyboardType="email-address"
         />
+        <Text style={styles.caveat}>As alterações no e-mail devem ser validadas via código de segurança.</Text>
+
+        <View style={styles.infoBox}>
+          <Info size={18} color={colors.accentForeground} weight="bold" />
+          <Text style={styles.infoBoxText}>
+            Para alterar outros dados cadastrais como cargo ou departamento, entre em contato com o seu gestor ou RH.
+          </Text>
+        </View>
 
         <Pressable style={styles.saveButton} onPress={handleSave} disabled={saving}>
           {saving ? (
@@ -157,6 +170,33 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.regular,
     fontSize: 14,
     color: colors.foreground,
+  },
+  inputDisabled: {
+    backgroundColor: colors.muted,
+    color: colors.mutedForeground,
+  },
+  caveat: {
+    fontFamily: fontFamily.regular,
+    fontSize: 11,
+    fontStyle: 'italic',
+    color: colors.mutedForeground,
+    marginTop: 4,
+  },
+  infoBox: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    backgroundColor: `${colors.accent}1F`,
+    borderRadius: radius.lg,
+    padding: spacing.md,
+    marginTop: spacing.md,
+    alignItems: 'flex-start',
+  },
+  infoBoxText: {
+    flex: 1,
+    fontFamily: fontFamily.medium,
+    fontSize: 12,
+    color: colors.accentForeground,
+    lineHeight: 17,
   },
   saveButton: {
     flexDirection: 'row',

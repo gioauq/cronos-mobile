@@ -13,7 +13,7 @@ type SessionUser = AppUser;
 type AuthContextValue = {
   user: SessionUser | null;
   isLoading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (registrationNumber: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   refreshUser: () => Promise<void>;
 };
@@ -29,6 +29,10 @@ function toSessionUser(fresh: FetchedUser): SessionUser {
     requiresSelfie: fresh.requiresSelfie,
     requiresLocation: fresh.requiresLocation,
     workUnit: fresh.workUnit,
+    registrationNumber: fresh.registrationNumber,
+    department: fresh.department,
+    admissionDate: fresh.admissionDate,
+    hasPhoto: fresh.hasPhoto,
   };
 }
 
@@ -65,9 +69,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })();
   }, []);
 
-  const signIn = useCallback(async (email: string, password: string) => {
+  const signIn = useCallback(async (registrationNumber: string, password: string) => {
     const deviceName = Device.deviceName ?? `${Device.modelName ?? 'Dispositivo'} (${Device.osName ?? 'mobile'})`;
-    const response = await apiLogin(email, password, deviceName);
+    const response = await apiLogin(registrationNumber, password, deviceName);
     await setAuthToken(response.token);
 
     const fresh = await fetchCurrentUser();
