@@ -87,6 +87,10 @@ export function HomeScreen() {
     if (!user) return;
 
     setIsSubmitting(true);
+    // Fica true até o usuário decidir o alerta de fora-do-perímetro abaixo — sem essa
+    // flag, o finally reseta isSubmitting assim que o Alert.alert (não-bloqueante) é
+    // exibido, reabilitando o botão de bater ponto enquanto a decisão ainda está pendente.
+    let deferResetToAlert = false;
     try {
       let selfieUri: string | null = null;
       if (user.requiresSelfie) {
@@ -116,12 +120,26 @@ export function HomeScreen() {
           const { withinRadius, distanceMeters } = checkGeofence(coords, user.workUnit);
 
           if (!withinRadius) {
+            deferResetToAlert = true;
             Alert.alert(
               'Fora do perímetro',
               `Você está a ${distanceMeters}m de ${user.workUnit.name} (raio permitido: ${user.workUnit.radius_meters}m). A marcação será salva, mas pode ser rejeitada na sincronização.`,
               [
-                { text: 'Cancelar', style: 'cancel', onPress: () => deleteSelfie(selfieUri) },
-                { text: 'Registrar mesmo assim', onPress: () => savePunch(selfieUri, coords) },
+                {
+                  text: 'Cancelar',
+                  style: 'cancel',
+                  onPress: () => {
+                    deleteSelfie(selfieUri);
+                    setIsSubmitting(false);
+                  },
+                },
+                {
+                  text: 'Registrar mesmo assim',
+                  onPress: async () => {
+                    await savePunch(selfieUri, coords);
+                    setIsSubmitting(false);
+                  },
+                },
               ]
             );
             return;
@@ -131,7 +149,9 @@ export function HomeScreen() {
 
       await savePunch(selfieUri, coords);
     } finally {
-      setIsSubmitting(false);
+      if (!deferResetToAlert) {
+        setIsSubmitting(false);
+      }
     }
   };
 
