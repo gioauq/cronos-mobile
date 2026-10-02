@@ -14,25 +14,35 @@ import { colors, fontFamily, radius, spacing } from '../theme';
 import { useAuth } from '../context/AuthContext';
 import { useAsyncAction } from '../hooks/useAsyncAction';
 
+function formatCpf(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 11);
+  const parts = [digits.slice(0, 3), digits.slice(3, 6), digits.slice(6, 9)].filter(Boolean);
+  let formatted = parts.join('.');
+  if (digits.length > 9) {
+    formatted += `-${digits.slice(9, 11)}`;
+  }
+  return formatted;
+}
+
 export function LoginScreen() {
   const { signIn } = useAuth();
-  const [registrationNumber, setRegistrationNumber] = useState('');
+  const [cpf, setCpf] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const { run: submit, isLoading: isSubmitting } = useAsyncAction(
-    (registrationNumberValue: string, passwordValue: string) => signIn(registrationNumberValue, passwordValue),
+    (cpfValue: string, passwordValue: string) => signIn(cpfValue, passwordValue),
     (err: any) => {
       const message =
-        err?.response?.data?.errors?.registration_number?.[0] ?? 'Não foi possível entrar. Verifique suas credenciais e a conexão.';
+        err?.response?.data?.errors?.cpf?.[0] ?? 'Não foi possível entrar. Verifique suas credenciais e a conexão.';
       setError(message);
     }
   );
 
   const handleSubmit = () => {
     setError(null);
-    submit(registrationNumber.trim(), password);
+    submit(cpf, password);
   };
 
   return (
@@ -51,15 +61,16 @@ export function LoginScreen() {
 
         <View style={styles.form}>
           <View style={styles.field}>
-            <Text style={styles.label}>Matrícula</Text>
+            <Text style={styles.label}>CPF</Text>
             <TextInput
-              value={registrationNumber}
-              onChangeText={setRegistrationNumber}
-              placeholder="Digite sua matrícula"
+              value={cpf}
+              onChangeText={(value) => setCpf(formatCpf(value))}
+              placeholder="000.000.000-00"
               placeholderTextColor={colors.mutedForeground}
-              autoCapitalize="none"
+              keyboardType="numeric"
               autoCorrect={false}
-              autoComplete="username"
+              autoComplete="off"
+              maxLength={14}
               style={styles.input}
             />
           </View>
@@ -89,7 +100,7 @@ export function LoginScreen() {
 
           <Pressable
             style={({ pressed }) => [styles.submitButton, pressed && styles.submitButtonPressed]}
-            disabled={isSubmitting || !registrationNumber || !password}
+            disabled={isSubmitting || !cpf || !password}
             onPress={handleSubmit}
           >
             {isSubmitting ? (
