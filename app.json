@@ -7,7 +7,7 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "bundleIdentifier": "br.com.pontocronos.app",
+      "bundleIdentifier": "br.com.pontocronos",
       "supportsTablet": false,
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "O Cronos usa sua localização para registrar onde cada marcação de ponto foi feita.",
