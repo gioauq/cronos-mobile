@@ -1,9 +1,11 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
-// Aponte para o IP local da máquina rodando o backend Laravel (não use 127.0.0.1 —
-// o celular/emulador não resolve isso para o host).
-export const API_BASE_URL = 'http://192.168.100.20/Cronos/public/api';
+// Builds de loja recebem EXPO_PUBLIC_API_URL pelo eas.json (produção). Em desenvolvimento,
+// cai no IP local da máquina rodando o backend Laravel (não use 127.0.0.1 — o
+// celular/emulador não resolve isso para o host).
+export const API_BASE_URL =
+  process.env.EXPO_PUBLIC_API_URL ?? 'http://192.168.100.20/Cronos/public/api';
 
 export const api = axios.create({
   baseURL: API_BASE_URL,

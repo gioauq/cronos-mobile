@@ -7,24 +7,28 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true,
+      "bundleIdentifier": "br.com.pontocronos.app",
+      "supportsTablet": false,
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "O Cronos usa sua localização para registrar onde cada marcação de ponto foi feita.",
-        "NSCameraUsageDescription": "O Cronos usa a câmera para tirar a selfie obrigatória de cada marcação de ponto."
+        "NSCameraUsageDescription": "O Cronos usa a câmera para tirar a selfie obrigatória de cada marcação de ponto.",
+        "NSPhotoLibraryUsageDescription": "O Cronos acessa suas fotos para você escolher a foto de perfil ou anexar comprovantes às justificativas.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
+      "package": "br.com.pontocronos.app",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#0F1F3D",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
       "permissions": [
-        "ACCESS_COARSE_LOCATION",
-        "ACCESS_FINE_LOCATION",
-        "CAMERA"
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.CAMERA"
       ]
     },
     "web": {
@@ -43,7 +47,9 @@
       [
         "expo-image-picker",
         {
-          "cameraPermission": "O Cronos usa a câmera para tirar a selfie obrigatória de cada marcação de ponto."
+          "cameraPermission": "O Cronos usa a câmera para tirar a selfie obrigatória de cada marcação de ponto.",
+          "photosPermission": "O Cronos acessa suas fotos para você escolher a foto de perfil ou anexar comprovantes às justificativas.",
+          "microphonePermission": false
         }
       ],
       "expo-sharing",
@@ -53,12 +59,23 @@
         {
           "color": "#0F1F3D"
         }
-      ]
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160,
+          "resizeMode": "contain",
+          "backgroundColor": "#0F1F3D"
+        }
+      ],
+      "expo-status-bar"
     ],
     "extra": {
       "eas": {
-        "projectId": "SUBSTITUA_PELO_PROJECT_ID_DO_EAS"
+        "projectId": "1eb2dbb9-2208-461a-a6c6-fc03d22cdac9"
       }
-    }
+    },
+    "owner": "gioauq"
   }
 }
