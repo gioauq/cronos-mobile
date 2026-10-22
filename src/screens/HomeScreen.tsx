@@ -22,7 +22,10 @@ export function HomeScreen() {
   const { isOnline, pendingCount, syncNow } = useSyncEngine(user?.id);
 
   const [now, setNow] = useState(new Date());
-  const [nextType, setNextType] = useState<PunchType>('entrada');
+  // A próxima batida é DERIVADA da última batida + a hora atual (que anda a cada segundo): assim o rótulo vira
+  // "Saída" sozinho quando passa de 1h30 do almoço e volta a "Entrada" na virada do dia, sem precisar recarregar.
+  const [lastPunch, setLastPunch] = useState<{ type: PunchType; recordedAt: string } | null>(null);
+  const nextType = nextPunchType(lastPunch, now);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
   const [coordinates, setCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
@@ -36,15 +39,8 @@ export function HomeScreen() {
   const refreshNextType = useCallback(async () => {
     if (!user) return;
     const last = await getLastRecord(user.id);
-    setNextType(nextPunchType(last ? { type: last.type, recordedAt: last.recorded_at } : null));
+    setLastPunch(last ? { type: last.type, recordedAt: last.recorded_at } : null);
   }, [user]);
-
-  // A "próxima batida" é por dia: se o app ficou aberto de um dia pro outro, recalcula na virada
-  // (senão continuaria oferecendo "Saída" na manhã seguinte).
-  const todayKey = now.toDateString();
-  useEffect(() => {
-    refreshNextType();
-  }, [todayKey, refreshNextType]);
 
   useEffect(() => {
     if (!user) return;
