@@ -36,8 +36,15 @@ export function HomeScreen() {
   const refreshNextType = useCallback(async () => {
     if (!user) return;
     const last = await getLastRecord(user.id);
-    setNextType(nextPunchType(last?.type ?? null));
+    setNextType(nextPunchType(last ? { type: last.type, recordedAt: last.recorded_at } : null));
   }, [user]);
+
+  // A "próxima batida" é por dia: se o app ficou aberto de um dia pro outro, recalcula na virada
+  // (senão continuaria oferecendo "Saída" na manhã seguinte).
+  const todayKey = now.toDateString();
+  useEffect(() => {
+    refreshNextType();
+  }, [todayKey, refreshNextType]);
 
   useEffect(() => {
     if (!user) return;
