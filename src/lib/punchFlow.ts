@@ -13,7 +13,8 @@ export const PUNCH_LABELS: Record<PunchType, string> = {
   saida: 'Saída',
 };
 
-type LastPunch = { type: PunchType; recordedAt: string };
+// beforeType = tipo da batida ANTERIOR à última (quando houver).
+type LastPunch = { type: PunchType; recordedAt: string; beforeType?: PunchType | null };
 
 function isSameLocalDay(a: Date, b: Date): boolean {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
@@ -38,6 +39,10 @@ export function nextPunchType(last: LastPunch | null, now: Date = new Date()): P
   if (last.type === 'pausa_entrada' && (now.getTime() - lastDate.getTime()) / 60000 > LUNCH_RETURN_MAX_MINUTES) {
     return 'saida';
   }
+
+  // A saída anterior fechou o dia com o almoço aberto: outra batida depois dela é mais uma saída, não uma
+  // entrada nova (senão quem deu um toque duplo de manhã terminaria o dia com uma "Entrada" às 17:53).
+  if (last.type === 'saida' && last.beforeType === 'pausa_entrada') return 'saida';
 
   const index = CYCLE.indexOf(last.type);
   if (index === -1 || index === CYCLE.length - 1) return 'entrada';

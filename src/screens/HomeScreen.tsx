@@ -11,7 +11,7 @@ import { getCurrentCoordinates, reverseGeocode } from '../lib/location';
 import { generatePunchHash } from '../lib/hash';
 import { captureSelfie, deleteSelfie } from '../lib/selfie';
 import { checkGeofence } from '../lib/geofence';
-import { insertPunch, getLastRecord, upsertFromServer, PunchType } from '../db/database';
+import { insertPunch, getRecentRecords, upsertFromServer, PunchType } from '../db/database';
 import { nextPunchType, PUNCH_LABELS } from '../lib/punchFlow';
 import { fetchTodayRecords } from '../api/timeRecords';
 
@@ -24,7 +24,7 @@ export function HomeScreen() {
   const [now, setNow] = useState(new Date());
   // A próxima batida é DERIVADA da última batida + a hora atual (que anda a cada segundo): assim o rótulo vira
   // "Saída" sozinho quando passa de 1h30 do almoço e volta a "Entrada" na virada do dia, sem precisar recarregar.
-  const [lastPunch, setLastPunch] = useState<{ type: PunchType; recordedAt: string } | null>(null);
+  const [lastPunch, setLastPunch] = useState<{ type: PunchType; recordedAt: string; beforeType: PunchType | null } | null>(null);
   const nextType = nextPunchType(lastPunch, now);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
@@ -38,8 +38,8 @@ export function HomeScreen() {
 
   const refreshNextType = useCallback(async () => {
     if (!user) return;
-    const last = await getLastRecord(user.id);
-    setLastPunch(last ? { type: last.type, recordedAt: last.recorded_at } : null);
+    const [last, before] = await getRecentRecords(user.id, 2);
+    setLastPunch(last ? { type: last.type, recordedAt: last.recorded_at, beforeType: before?.type ?? null } : null);
   }, [user]);
 
   useEffect(() => {
