@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { Eye, EyeSlash, Timer } from 'phosphor-react-native';
 import { colors, fontFamily, radius, spacing } from '../theme';
+import { Bond } from '../api/auth';
 import { useAuth } from '../context/AuthContext';
 import { useAsyncAction } from '../hooks/useAsyncAction';
 
@@ -30,9 +31,19 @@ export function LoginScreen() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Duplo vínculo: preenchido quando o CPF tem mais de uma matrícula — a tela troca pro
+  // seletor de vínculo e o mesmo "Entrar" conclui o login na matrícula escolhida.
+  const [bonds, setBonds] = useState<Bond[] | null>(null);
+  const [selectedBond, setSelectedBond] = useState<string | null>(null);
 
   const { run: submit, isLoading: isSubmitting } = useAsyncAction(
-    (cpfValue: string, passwordValue: string) => signIn(cpfValue, passwordValue),
+    async (cpfValue: string, passwordValue: string, registrationNumber?: string) => {
+      const pendingBonds = await signIn(cpfValue, passwordValue, registrationNumber);
+      if (pendingBonds) {
+        setBonds(pendingBonds);
+        setSelectedBond(pendingBonds[0]?.registration_number ?? null);
+      }
+    },
     (err: any) => {
       const message =
         err?.response?.data?.errors?.cpf?.[0] ?? 'Não foi possível entrar. Verifique suas credenciais e a conexão.';
@@ -43,6 +54,18 @@ export function LoginScreen() {
   const handleSubmit = () => {
     setError(null);
     submit(cpf, password);
+  };
+
+  const handleBondSubmit = () => {
+    if (!selectedBond) return;
+    setError(null);
+    submit(cpf, password, selectedBond);
+  };
+
+  const handleBackToCredentials = () => {
+    setBonds(null);
+    setSelectedBond(null);
+    setError(null);
   };
 
   return (
@@ -59,6 +82,48 @@ export function LoginScreen() {
           <Text style={styles.subtitle}>Controle de ponto seguro e preciso</Text>
         </View>
 
+        {bonds ? (
+          <View style={styles.form}>
+            <View style={styles.field}>
+              <Text style={styles.label}>Você tem mais de um vínculo</Text>
+              <Text style={styles.bondHint}>Escolha em qual matrícula deseja entrar:</Text>
+            </View>
+
+            {bonds.map((bond) => {
+              const selected = selectedBond === bond.registration_number;
+              return (
+                <Pressable
+                  key={bond.registration_number}
+                  style={[styles.bondOption, selected && styles.bondOptionSelected]}
+                  onPress={() => setSelectedBond(bond.registration_number)}
+                >
+                  <Text style={[styles.bondLabel, selected && styles.bondLabelSelected]}>
+                    {bond.registration_number} · {bond.work_unit ?? 'sem unidade'}
+                  </Text>
+                  {bond.job_title ? <Text style={styles.bondJob}>{bond.job_title}</Text> : null}
+                </Pressable>
+              );
+            })}
+
+            {error && <Text style={styles.error}>{error}</Text>}
+
+            <Pressable
+              style={({ pressed }) => [styles.submitButton, pressed && styles.submitButtonPressed]}
+              disabled={isSubmitting || !selectedBond}
+              onPress={handleBondSubmit}
+            >
+              {isSubmitting ? (
+                <ActivityIndicator color={colors.primaryForeground} />
+              ) : (
+                <Text style={styles.submitLabel}>Entrar</Text>
+              )}
+            </Pressable>
+
+            <Pressable style={styles.backButton} onPress={handleBackToCredentials} disabled={isSubmitting}>
+              <Text style={styles.backLabel}>Voltar</Text>
+            </Pressable>
+          </View>
+        ) : (
         <View style={styles.form}>
           <View style={styles.field}>
             <Text style={styles.label}>CPF</Text>
@@ -114,6 +179,7 @@ export function LoginScreen() {
             Ao entrar, você concorda com os termos de uso e políticas de privacidade da sua empresa.
           </Text>
         </View>
+        )}
       </View>
     </KeyboardAvoidingView>
   );
@@ -213,5 +279,46 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     lineHeight: 16,
     marginTop: spacing.xs,
+  },
+  bondHint: {
+    fontFamily: fontFamily.regular,
+    fontSize: 14,
+    color: colors.foreground,
+    marginLeft: 4,
+  },
+  bondOption: {
+    backgroundColor: colors.input,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.xl,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    gap: 2,
+  },
+  bondOptionSelected: {
+    borderColor: colors.primary,
+    borderWidth: 2,
+  },
+  bondLabel: {
+    fontFamily: fontFamily.bold,
+    fontSize: 15,
+    color: colors.foreground,
+  },
+  bondLabelSelected: {
+    color: colors.primary,
+  },
+  bondJob: {
+    fontFamily: fontFamily.regular,
+    fontSize: 12,
+    color: colors.mutedForeground,
+  },
+  backButton: {
+    alignItems: 'center',
+    paddingVertical: spacing.xs,
+  },
+  backLabel: {
+    fontFamily: fontFamily.bold,
+    fontSize: 14,
+    color: colors.mutedForeground,
   },
 });

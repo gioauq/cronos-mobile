@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import * as Device from 'expo-device';
 import * as SecureStore from 'expo-secure-store';
 import { loadStoredToken, registerSessionExpiredHandler, setAuthToken } from '../api/client';
-import { login as apiLogin, logout as apiLogout } from '../api/auth';
+import { Bond, login as apiLogin, logout as apiLogout, requiresBondSelection } from '../api/auth';
 import { fetchCurrentUser, FetchedUser } from '../api/user';
 import { initDatabase } from '../db/database';
 import { registerForPushNotifications, unregisterPushNotifications } from '../lib/push';
@@ -13,7 +13,10 @@ type SessionUser = AppUser;
 type AuthContextValue = {
   user: SessionUser | null;
   isLoading: boolean;
-  signIn: (cpf: string, password: string) => Promise<void>;
+  // Devolve a lista de vínculos quando o CPF tem mais de uma matrícula (duplo vínculo) — a
+  // tela de login mostra a escolha e repete o signIn com o registrationNumber. Devolve null
+  // quando o login concluiu de verdade.
+  signIn: (cpf: string, password: string, registrationNumber?: string) => Promise<Bond[] | null>;
   signOut: () => Promise<void>;
   refreshUser: () => Promise<void>;
 };
@@ -69,9 +72,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })();
   }, []);
 
-  const signIn = useCallback(async (cpf: string, password: string) => {
+  const signIn = useCallback(async (cpf: string, password: string, registrationNumber?: string) => {
     const deviceName = Device.deviceName ?? `${Device.modelName ?? 'Dispositivo'} (${Device.osName ?? 'mobile'})`;
-    const response = await apiLogin(cpf, password, deviceName);
+    const response = await apiLogin(cpf, password, deviceName, registrationNumber);
+
+    // Duplo vínculo: nada autenticado ainda (o backend não emitiu token) — devolve os
+    // vínculos pra tela de login mostrar a escolha.
+    if (requiresBondSelection(response)) {
+      return response.bonds;
+    }
+
     await setAuthToken(response.token);
 
     const fresh = await fetchCurrentUser();
@@ -80,6 +90,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(sessionUser);
 
     registerForPushNotifications();
+
+    return null;
   }, []);
 
   const refreshUser = useCallback(async () => {
