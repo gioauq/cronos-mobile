@@ -86,6 +86,67 @@ export function HomeScreen() {
     [user, nextType, refreshNextType, syncNow]
   );
 
+  /**
+   * Segunda metade da batida: localização, geofence e gravação. Separada de handlePunch porque a
+   * batida sem selfie continua por aqui depois que o servidor confirma no alerta.
+   *
+   * Retorna true quando deixou um Alert aberto e vai resetar isSubmitting sozinha — devolver isso
+   * em vez de resetar aqui é o que impede o botão de reabilitar enquanto a decisão está pendente.
+   */
+  const continuePunch = async (selfieUri: string | null): Promise<boolean> => {
+    if (!user) return false;
+
+    let coords: { latitude: number; longitude: number } | null = null;
+    if (user.requiresLocation) {
+      setIsLocating(true);
+      coords = await getCurrentCoordinates();
+      setIsLocating(false);
+
+      if (!coords) {
+        deleteSelfie(selfieUri);
+        Alert.alert('Localização obrigatória', 'Não foi possível obter sua localização. Ative o GPS e tente novamente.');
+        return false;
+      }
+
+      setCoordinates(coords);
+      reverseGeocode(coords).then(setAddress);
+
+      if (user.workUnit) {
+        const { withinRadius, distanceMeters } = checkGeofence(coords, user.workUnit);
+
+        if (!withinRadius) {
+          Alert.alert(
+            'Fora do perímetro',
+            `Você está a ${distanceMeters}m de ${user.workUnit.name} (raio permitido: ${user.workUnit.radius_meters}m). A marcação será salva e enviada para análise do RH — ela só entra na folha depois de liberada.`,
+            [
+              {
+                text: 'Cancelar',
+                style: 'cancel',
+                onPress: () => {
+                  deleteSelfie(selfieUri);
+                  setIsSubmitting(false);
+                },
+              },
+              {
+                text: 'Registrar mesmo assim',
+                onPress: async () => {
+                  await savePunch(selfieUri, coords);
+                  setIsSubmitting(false);
+                },
+              },
+            ]
+          );
+
+          return true;
+        }
+      }
+    }
+
+    await savePunch(selfieUri, coords);
+
+    return false;
+  };
+
   const handlePunch = async () => {
     if (!user) return;
 
@@ -98,59 +159,31 @@ export function HomeScreen() {
       let selfieUri: string | null = null;
       if (user.requiresSelfie) {
         selfieUri = await captureSelfie();
+
+        // Sem selfie a batida NÃO é mais abandonada: ela pode seguir sem a foto e o servidor a
+        // grava em quarentena (Marcações Divergentes), onde o RH libera ou recusa. Perder a hora
+        // trabalhada porque a câmera falhou era pior do que registrar com uma pendência.
         if (!selfieUri) {
-          Alert.alert('Selfie obrigatória', 'A marcação de ponto exige uma selfie. Tente novamente.');
+          deferResetToAlert = true;
+          Alert.alert(
+            'Selfie não capturada',
+            'A marcação de ponto exige uma selfie. Você pode tentar de novo ou registrar sem a foto — nesse caso a marcação vai para análise do RH e só entra na folha depois de liberada.',
+            [
+              { text: 'Tentar de novo', style: 'cancel', onPress: () => setIsSubmitting(false) },
+              {
+                text: 'Registrar sem selfie',
+                onPress: async () => {
+                  const deferred = await continuePunch(null);
+                  if (!deferred) setIsSubmitting(false);
+                },
+              },
+            ]
+          );
           return;
         }
       }
 
-      let coords: { latitude: number; longitude: number } | null = null;
-      if (user.requiresLocation) {
-        setIsLocating(true);
-        coords = await getCurrentCoordinates();
-        setIsLocating(false);
-
-        if (!coords) {
-          deleteSelfie(selfieUri);
-          Alert.alert('Localização obrigatória', 'Não foi possível obter sua localização. Ative o GPS e tente novamente.');
-          return;
-        }
-
-        setCoordinates(coords);
-        reverseGeocode(coords).then(setAddress);
-
-        if (user.workUnit) {
-          const { withinRadius, distanceMeters } = checkGeofence(coords, user.workUnit);
-
-          if (!withinRadius) {
-            deferResetToAlert = true;
-            Alert.alert(
-              'Fora do perímetro',
-              `Você está a ${distanceMeters}m de ${user.workUnit.name} (raio permitido: ${user.workUnit.radius_meters}m). A marcação será salva, mas pode ser rejeitada na sincronização.`,
-              [
-                {
-                  text: 'Cancelar',
-                  style: 'cancel',
-                  onPress: () => {
-                    deleteSelfie(selfieUri);
-                    setIsSubmitting(false);
-                  },
-                },
-                {
-                  text: 'Registrar mesmo assim',
-                  onPress: async () => {
-                    await savePunch(selfieUri, coords);
-                    setIsSubmitting(false);
-                  },
-                },
-              ]
-            );
-            return;
-          }
-        }
-      }
-
-      await savePunch(selfieUri, coords);
+      deferResetToAlert = await continuePunch(selfieUri);
     } finally {
       if (!deferResetToAlert) {
         setIsSubmitting(false);

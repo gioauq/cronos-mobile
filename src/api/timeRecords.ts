@@ -3,17 +3,30 @@ import type { PendingRecord } from '../db/database';
 
 export type SyncResultStatus = 'created' | 'already_synced' | 'rejected';
 
+/**
+ * Marcação aceita pelo servidor MAS em quarentena: foi batida fora do raio permitido ou sem a
+ * selfie exigida. Ela já está no servidor (o status vem como 'created', então sai da fila local),
+ * só não entra na folha até o RH liberar na tela Marcações Divergentes. Antes, o servidor
+ * devolvia 'rejected' nesses casos e a batida morria no celular.
+ */
+export type SyncDivergence = {
+  status: 'pending' | 'approved' | 'rejected';
+  reasons: string[];
+  distance_m?: number;
+};
+
 export type SyncResult = {
   hash: string | null;
   status: SyncResultStatus;
   id?: number;
   reason?: string;
   distance_m?: number;
+  divergence?: SyncDivergence;
 };
 
 export type SyncResponse = {
   message: string;
-  summary: { created: number; already_synced: number; rejected: number };
+  summary: { created: number; already_synced: number; rejected: number; divergent?: number };
   results: SyncResult[];
 };
 

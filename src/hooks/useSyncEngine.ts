@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AppState } from 'react-native';
+import { Alert, AppState } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import { trySync } from '../lib/sync';
 import { getPendingCount } from '../db/database';
@@ -22,7 +22,18 @@ export function useSyncEngine(userId: number | undefined) {
     if (!userIdRef.current) return;
     setIsSyncing(true);
     try {
-      await trySync(userIdRef.current);
+      const outcome = await trySync(userIdRef.current);
+
+      // Batida que estava na fila offline e voltou do servidor em quarentena: o servidor precisa
+      // saber, senão ele vê "0 pendentes" e acredita que a hora entrou na folha. Quem bateu com o
+      // app aberto já viu o alerta na hora — este cobre a que sincronizou sozinha depois.
+      if (outcome.divergent > 0) {
+        Alert.alert(
+          outcome.divergent > 1 ? 'Marcações enviadas para análise' : 'Marcação enviada para análise',
+          `${outcome.divergent} marcação(ões) foram aceitas com pendência (${outcome.divergenceReasons.join(' e ')}).`
+            + ' Elas só entram na folha depois que o RH liberar.'
+        );
+      }
     } finally {
       setIsSyncing(false);
       await refreshPendingCount();
