@@ -7,9 +7,11 @@ type Props = {
   isLoading: boolean;
   address: string | null;
   coordinates: { latitude: number; longitude: number } | null;
+  /** Degrau atual da escada de localização ("Ligando o GPS…"), pra espera não parecer travamento. */
+  statusLabel?: string | null;
 };
 
-export function LocationCard({ isLoading, address, coordinates }: Props) {
+export function LocationCard({ isLoading, address, coordinates, statusLabel }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.thumbnail}>
@@ -19,7 +21,7 @@ export function LocationCard({ isLoading, address, coordinates }: Props) {
         {isLoading ? (
           <View style={styles.statusRow}>
             <ActivityIndicator size="small" color={colors.mutedForeground} />
-            <Text style={styles.statusTextMuted}>Obtendo localização…</Text>
+            <Text style={styles.statusTextMuted}>{statusLabel ?? 'Obtendo localização…'}</Text>
           </View>
         ) : coordinates ? (
           <>
@@ -35,7 +37,7 @@ export function LocationCard({ isLoading, address, coordinates }: Props) {
             </Text>
           </>
         ) : (
-          <Text style={styles.statusTextMuted}>Localização indisponível — a marcação será salva sem GPS.</Text>
+          <Text style={styles.statusTextMuted}>Aguardando sinal do GPS…</Text>
         )}
       </View>
     </View>

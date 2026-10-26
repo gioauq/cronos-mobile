@@ -18,6 +18,11 @@ export function useSyncEngine(userId: number | undefined) {
     setPendingCount(await getPendingCount(userIdRef.current));
   }, []);
 
+  /**
+   * Nunca propaga erro: é chamada por listeners (NetInfo, AppState, intervalo) que não têm
+   * catch, e agora também ANTES de gravar a batida — uma falha de rede aqui não pode impedir
+   * ninguém de bater o ponto.
+   */
   const syncNow = useCallback(async () => {
     if (!userIdRef.current) return;
     setIsSyncing(true);
@@ -34,6 +39,9 @@ export function useSyncEngine(userId: number | undefined) {
             + ' Elas só entram na folha depois que o RH liberar.'
         );
       }
+    } catch {
+      // Sem rede, 422 ou servidor fora: as batidas continuam na fila local e a próxima
+      // tentativa (NetInfo/AppState/intervalo) tenta de novo.
     } finally {
       setIsSyncing(false);
       await refreshPendingCount();
