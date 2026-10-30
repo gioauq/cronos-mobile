@@ -193,10 +193,20 @@ function DayCard({ day }: { day: Day }) {
   const deltaColor = day.balance_hours > 0 ? colors.accent : day.balance_hours < 0 ? colors.destructive : colors.mutedForeground;
   const deltaSign = day.balance_hours > 0 ? '+' : day.balance_hours < 0 ? '-' : '';
 
+  // Dobra tem prioridade: é o que muda o pagamento do dia.
+  const occurrence = day.has_double ? 'Dobra' : day.shift_swap_role ? 'Troca' : null;
+
   return (
     <View style={styles.dayCard}>
       <View style={styles.dayCardTop}>
-        <Text style={styles.dayDate}>{label}</Text>
+        <View style={styles.dateRow}>
+          <Text style={styles.dayDate}>{label}</Text>
+          {occurrence && (
+            <View style={styles.occurrenceBadge}>
+              <Text style={styles.occurrenceText}>{occurrence}</Text>
+            </View>
+          )}
+        </View>
         <Text style={styles.dayWorked}>{formatHoursAsClock(day.worked_hours)}h</Text>
       </View>
       <View style={styles.dayCardBottom}>
@@ -308,7 +318,10 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   dayCardTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  dateRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   dayDate: { fontFamily: fontFamily.bold, fontSize: 14, color: colors.foreground, textTransform: 'capitalize' },
+  occurrenceBadge: { backgroundColor: `${colors.accent}26`, borderRadius: radius.full, paddingHorizontal: spacing.sm, paddingVertical: 2 },
+  occurrenceText: { fontFamily: fontFamily.bold, fontSize: 10, color: colors.accentForeground, textTransform: 'uppercase' },
   dayWorked: { fontFamily: fontFamily.bold, fontSize: 14, color: colors.foreground },
   dayCardBottom: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   punchRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, flexShrink: 1 },

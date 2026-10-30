@@ -12,6 +12,7 @@ import { ProfileScreen } from '../screens/ProfileScreen';
 import { TimesheetScreen } from '../screens/TimesheetScreen';
 import { JustificationScreen } from '../screens/JustificationScreen';
 import { EditProfileScreen } from '../screens/EditProfileScreen';
+import { ShiftSwapsScreen } from '../screens/ShiftSwapsScreen';
 import { colors, fontFamily } from '../theme';
 
 const Stack = createNativeStackNavigator();
@@ -76,6 +77,8 @@ export function RootNavigator() {
             <Stack.Screen name="Timesheet" component={TimesheetScreen} />
             <Stack.Screen name="Justification" component={JustificationScreen} />
             <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+            {/* Troca de serviço: só existe para quem está numa escala que a permite. */}
+            {user.canSwapShifts && <Stack.Screen name="ShiftSwaps" component={ShiftSwapsScreen} />}
           </>
         ) : (
           <Stack.Screen name="Login" component={LoginScreen} />

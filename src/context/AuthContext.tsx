@@ -33,6 +33,7 @@ function toSessionUser(fresh: FetchedUser): SessionUser {
     department: fresh.department,
     admissionDate: fresh.admissionDate,
     hasPhoto: fresh.hasPhoto,
+    canSwapShifts: fresh.canSwapShifts,
   };
 }
 

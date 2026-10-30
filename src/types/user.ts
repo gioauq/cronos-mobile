@@ -25,4 +25,6 @@ export type AppUser = {
   department: string | null;
   admissionDate: string | null;
   hasPhoto: boolean;
+  /** A escala dele permite troca de serviço: só então a tela de trocas aparece no app. */
+  canSwapShifts: boolean;
 };

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Alert, Image, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Article, Briefcase, CalendarBlank, CaretRight, ChatTeardropText, IdentificationCard, SignOut, User, UserFocus } from 'phosphor-react-native';
+import { ArrowsLeftRight, Article, Briefcase, CalendarBlank, CaretRight, ChatTeardropText, IdentificationCard, SignOut, User, UserFocus } from 'phosphor-react-native';
 import { colors, fontFamily, radius, spacing } from '../theme';
 import { useAuth } from '../context/AuthContext';
 import { authHeader, profilePhotoUrl } from '../api/profile';
@@ -85,6 +85,20 @@ export function ProfileScreen() {
             </View>
             <CaretRight size={18} color={colors.mutedForeground} />
           </Pressable>
+          {user?.canSwapShifts && (
+            <>
+              <View style={styles.separator} />
+              <Pressable style={styles.actionRow} onPress={() => navigation.navigate('ShiftSwaps')}>
+                <View style={styles.actionLeft}>
+                  <View style={styles.iconBox}>
+                    <ArrowsLeftRight size={20} color={colors.primary} weight="bold" />
+                  </View>
+                  <Text style={styles.actionLabel}>Troca de Serviço</Text>
+                </View>
+                <CaretRight size={18} color={colors.mutedForeground} />
+              </Pressable>
+            </>
+          )}
           <View style={styles.separator} />
           <Pressable style={styles.actionRow} onPress={confirmSignOut}>
             <View style={styles.actionLeft}>

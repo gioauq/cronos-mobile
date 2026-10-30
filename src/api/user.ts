@@ -15,6 +15,8 @@ export type CurrentUser = {
   department: string | null;
   admission_date: string | null;
   photo_path: string | null;
+  // Ausente em servidor antigo: sem a informação, a troca de serviço fica escondida.
+  can_swap_shifts?: boolean;
 };
 
 export type FetchedUser = AppUser;
@@ -47,5 +49,6 @@ export async function fetchCurrentUser(): Promise<FetchedUser> {
     department: raw.department,
     admissionDate: raw.admission_date,
     hasPhoto: !!raw.photo_path,
+    canSwapShifts: raw.can_swap_shifts === true,
   };
 }

@@ -42,6 +42,9 @@ export type TimesheetDay = {
   worked_hours: number;
   balance_hours: number;
   has_inconsistency: boolean;
+  // Troca/dobra de serviço do dia (ausentes em servidor antigo). O espelho mostra só "Troca"/"Dobra".
+  shift_swap_role?: 'covering' | 'covered' | null;
+  has_double?: boolean;
 };
 
 export type TimesheetResponse = {
