@@ -15,6 +15,13 @@ export function PunchButton({ label, disabled, isSubmitting, onPress }: Props) {
     <Pressable
       onPress={onPress}
       disabled={disabled || isSubmitting}
+      // O botão é um círculo com ícone e um rótulo curto ("Entrada", "Saída"): sem estes
+      // atributos o leitor de tela anuncia só a palavra solta, sem dizer que é o botão de
+      // registrar o ponto nem que ele está processando.
+      accessibilityRole="button"
+      accessibilityLabel={`Registrar ${label}`}
+      accessibilityHint="Tira a selfie, captura a localização e registra sua marcação de ponto"
+      accessibilityState={{ disabled: disabled || isSubmitting, busy: isSubmitting }}
       style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
     >
       {isSubmitting ? (

@@ -71,6 +71,7 @@ export function LoginScreen() {
               autoCorrect={false}
               autoComplete="off"
               maxLength={14}
+              accessibilityLabel="CPF"
               style={styles.input}
             />
           </View>
@@ -84,9 +85,15 @@ export function LoginScreen() {
                 placeholder="••••••••"
                 placeholderTextColor={colors.mutedForeground}
                 secureTextEntry={!showPassword}
+                accessibilityLabel="Senha"
                 style={[styles.input, styles.passwordInput]}
               />
-              <Pressable style={styles.eyeButton} onPress={() => setShowPassword((v) => !v)}>
+              <Pressable
+                style={styles.eyeButton}
+                onPress={() => setShowPassword((v) => !v)}
+                accessibilityRole="button"
+                accessibilityLabel={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+              >
                 {showPassword ? (
                   <EyeSlash size={20} color={colors.mutedForeground} weight="bold" />
                 ) : (
@@ -102,6 +109,9 @@ export function LoginScreen() {
             style={({ pressed }) => [styles.submitButton, pressed && styles.submitButtonPressed]}
             disabled={isSubmitting || !cpf || !password}
             onPress={handleSubmit}
+            accessibilityRole="button"
+            accessibilityLabel="Entrar"
+            accessibilityState={{ disabled: isSubmitting || !cpf || !password, busy: isSubmitting }}
           >
             {isSubmitting ? (
               <ActivityIndicator color={colors.primaryForeground} />
