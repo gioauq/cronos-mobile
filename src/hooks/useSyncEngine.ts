@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, AppState } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import { trySync } from '../lib/sync';
+import { BACKGROUND_SYNC_BUDGET_MS } from '../lib/syncBatching';
 import { getPendingCount } from '../db/database';
 
 const SAFETY_INTERVAL_MS = 60_000;
@@ -23,11 +24,11 @@ export function useSyncEngine(userId: number | undefined) {
    * catch, e agora também ANTES de gravar a batida — uma falha de rede aqui não pode impedir
    * ninguém de bater o ponto.
    */
-  const syncNow = useCallback(async () => {
+  const syncNow = useCallback(async (budgetMs: number = BACKGROUND_SYNC_BUDGET_MS) => {
     if (!userIdRef.current) return;
     setIsSyncing(true);
     try {
-      const outcome = await trySync(userIdRef.current);
+      const outcome = await trySync(userIdRef.current, budgetMs);
 
       // Batida que estava na fila offline e voltou do servidor em quarentena: o servidor precisa
       // saber, senão ele vê "0 pendentes" e acredita que a hora entrou na folha. Quem bateu com o

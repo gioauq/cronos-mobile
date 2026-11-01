@@ -14,6 +14,7 @@ import { captureSelfie, deleteSelfie } from '../lib/selfie';
 import { checkGeofence } from '../lib/geofence';
 import { insertPunch, getRecentRecords, upsertFromServer, PunchType } from '../db/database';
 import { nextPunchType, PUNCH_LABELS } from '../lib/punchFlow';
+import { PUNCH_FLUSH_BUDGET_MS } from '../lib/syncBatching';
 import { fetchTodayRecords } from '../api/timeRecords';
 
 const TODAY_LABEL = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
@@ -272,7 +273,11 @@ export function HomeScreen() {
 
     // Dispara já, sem await: a fila pendente vai sendo enviada enquanto a pessoa tira a selfie
     // e o GPS fixa. Quem espera por ela é continuePunch, antes de gravar a batida nova.
-    const flush = pendingCount > 0 ? syncNow() : Promise.resolve();
+    //
+    // Orçamento CURTO (ver PUNCH_FLUSH_BUDGET_MS): a gravação da batida espera por este envio, e
+    // ninguém pode ficar com o celular na mão esperando uma fila de semanas subir para bater o
+    // ponto. O que não couber aqui continua pendente e sobe no envio de fundo, que tem tempo.
+    const flush = pendingCount > 0 ? syncNow(PUNCH_FLUSH_BUDGET_MS) : Promise.resolve();
 
     setIsSubmitting(true);
     // Fica true até o usuário decidir o alerta de fora-do-perímetro abaixo — sem essa

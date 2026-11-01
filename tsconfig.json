@@ -2,5 +2,9 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true
-  }
+  },
+  // Os testes de lógica pura ficam de fora daqui e são conferidos por tsconfig.test.json: eles
+  // importam "node:test" e usam a extensão ".ts" no import, que é o que o runner do Node exige e
+  // o que a resolução "bundler" do app recusa. Ver o cabeçalho daquele arquivo.
+  "exclude": ["node_modules", "android", "ios", "src/**/*.test.ts"]
 }

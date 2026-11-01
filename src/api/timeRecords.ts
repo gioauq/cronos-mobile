@@ -30,7 +30,15 @@ export type SyncResponse = {
   results: SyncResult[];
 };
 
-export async function syncTimeRecords(records: PendingRecord[]): Promise<SyncResponse> {
+/** Uma marcação pronta para subir: a selfie já resolvida para o caminho de HOJE (ou null). */
+export type UploadableRecord = Omit<PendingRecord, 'selfie_uri'> & { selfie_uri: string | null };
+
+/**
+ * `timeoutMs` é obrigatório e NÃO usa o timeout do cliente (10s): é esse timeout curto, aplicado a
+ * um lote de até 50 selfies, que travava a fila do app para sempre — ver src/lib/syncBatching.ts.
+ * Quem chama calcula o teto pelo que o lote carrega.
+ */
+export async function syncTimeRecords(records: UploadableRecord[], timeoutMs: number): Promise<SyncResponse> {
   const formData = new FormData();
 
   records.forEach((r, index) => {
@@ -51,6 +59,7 @@ export async function syncTimeRecords(records: PendingRecord[]): Promise<SyncRes
 
   const response = await api.post<SyncResponse>('/time-records/sync', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
+    timeout: timeoutMs,
   });
   return response.data;
 }

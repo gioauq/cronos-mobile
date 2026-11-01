@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { getRecentRecords, PendingRecord, resetToPending, SYNC_PENDING, SYNC_REJECTED, SYNC_SYNCED } from '../db/database';
 import { PUNCH_LABELS } from '../lib/punchFlow';
 import { trySync } from '../lib/sync';
+import { MANUAL_RETRY_BUDGET_MS } from '../lib/syncBatching';
 
 type Section = { title: string; data: PendingRecord[] };
 
@@ -34,7 +35,9 @@ export function HistoryScreen() {
       setRetryingHash(hash);
       try {
         await resetToPending(hash);
-        await trySync(user.id);
+        // Orçamento do meio: quem tocou "Reenviar" está olhando o spinner (ver
+        // MANUAL_RETRY_BUDGET_MS). O que não couber volta a subir sozinho no envio de fundo.
+        await trySync(user.id, MANUAL_RETRY_BUDGET_MS);
       } finally {
         setRetryingHash(null);
         await load();

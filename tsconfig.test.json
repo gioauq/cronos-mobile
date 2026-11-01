@@ -1,0 +1,19 @@
+{
+  // Os testes de lógica pura rodam no Node (node --test, ver package.json), não no aparelho — e o
+  // Node exige a extensão ".ts" explícita no import e os tipos de "node:test"/"node:assert". A
+  // configuração do app usa moduleResolution "bundler" com a condição "react-native", que não
+  // resolve os módulos embutidos do Node. Misturar as duas numa configuração só obrigaria a
+  // afrouxar a do app por causa dos testes; separar deixa cada uma certa para o que ela compila.
+  "compilerOptions": {
+    "strict": true,
+    "noEmit": true,
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "allowImportingTsExtensions": true,
+    "target": "ESNext",
+    "lib": ["ESNext"],
+    "types": ["node"],
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*.test.ts"]
+}

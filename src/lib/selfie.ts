@@ -3,6 +3,7 @@ import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import { File, Paths } from 'expo-file-system';
 
 import { frameSize } from './facePhotoStandard';
+import { selfieFileName } from './syncBatching';
 
 /**
  * Abre a câmera frontal para o funcionário tirar a selfie da marcação de ponto.
@@ -54,10 +55,38 @@ async function frameToStandard(uri: string, width: number, height: number): Prom
   }
 }
 
-export function deleteSelfie(uri: string | null) {
-  if (!uri) return;
+/**
+ * O caminho de HOJE para a selfie gravada na fila, ou null quando o arquivo não existe mais.
+ *
+ * O caminho guardado no banco local é absoluto, e no iOS ele contém o UUID do contêiner do app —
+ * que MUDA quando o app é atualizado ou restaurado de backup. A marcação que ficou na fila antes
+ * de uma atualização passava a apontar para um arquivo inexistente, o corpo multipart não era
+ * montado, e aquela marcação nunca mais subia. Reencontrar pelo NOME resolve as que já estão
+ * presas nos aparelhos, sem precisar migrar o banco local.
+ *
+ * Null aqui NÃO cancela a marcação: ela sobe sem foto e o servidor a guarda em quarentena
+ * (Marcações Divergentes), onde o RH libera. Perder a hora trabalhada porque o arquivo da foto
+ * sumiu seria o pior dos dois.
+ */
+export function resolveSelfieUri(storedUri: string | null): string | null {
+  const name = selfieFileName(storedUri);
+  if (!name) return null;
+
   try {
-    const file = new File(uri);
+    const file = new File(Paths.document, name);
+
+    return file.exists ? file.uri : null;
+  } catch {
+    return null;
+  }
+}
+
+export function deleteSelfie(uri: string | null) {
+  const current = resolveSelfieUri(uri);
+  if (!current) return;
+
+  try {
+    const file = new File(current);
     if (file.exists) file.delete();
   } catch {
     // Arquivo já pode ter sido removido — não é crítico.
